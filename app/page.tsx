@@ -2,10 +2,112 @@
 import { useState } from "react";
 
 const NICHES = [
-  { id: "money", name: "المال 💰", en: ["How I saved $500 in 30 days", "Why your salary disappears in 10 days", "Side incomes you can start tonight", "3 money mistakes keeping you poor", "How rich people think about money", "Stop doing this with your money", "My $1000 emergency fund challenge", "Passive income ideas for beginners", "Why you are still broke", "5 habits of millionaires"], ar: ["كيف وفّرت 500$ بـ 30 يوم", "ليش راتبك بخلص بـ 10 أيام", "دخل إضافي بتبلشو الليلة", "3 أخطاء بتخليك فقير", "كيف الأغنياء بفكرو بالمال", "وقف تعمل هيك بمصاريك", "تحدي 1000$ للطوارئ", "أفكار دخل سلبي للمبتدئين", "ليش انت لسا مفلس", "5 عادات المليونيرية"] },
-  { id: "health", name: "الصحة 🥗", en: ["Drink this every morning", "Why you are always tired", "3 foods destroying your health", "Lose belly fat without gym", "This habit is killing you slowly", "Morning routine of healthy people", "Stop eating this at night", "How I lost 10kg in 2 months", "Your body needs this vitamin", "Sleep like this to live longer"], ar: ["اشرب هاد كل صبح", "ليش انت دايماً تعبان", "3 أكلات بتدمر صحتك", "انحف بدون جيم", "هاي العادة بتقتلك ببطء", "روتين الصبح للناس الصحية", "وقف تاكل هاد بالليل", "كيف خسرت 10 كيلو بشهرين", "جسمك محتاج هاد الفيتامين", "نام هيك لتعيش أطول"] },
-  { id: "tech", name: "التقنية 📱", en: ["AI tools that make you money", "Your phone is spying on you", "Best AI apps in 2026", "Stop using ChatGPT like this", "Future jobs that will disappear", "This AI will replace your job", "Hidden iPhone tricks", "Make money with AI in 2026", "Secrets of your phone you didn't know", "Top 5 apps you need now"], ar: ["أدوات ذكاء اصطناعي بتعملك مصاري", "تلفونك بتجسس عليك", "أفضل تطبيقات ذكاء اصطناعي 2026", "وقف تستخدم شات جي بي تي هيك", "وظايف راح تختفي بالمستقبل", "هاد الذكاء الاصطناعي راح ياخد شغلك", "حيل آيفون مخفية", "اعمل مصاري بالذكاء الاصطناعي", "أسرار تلفونك ما كنت تعرفها", "أهم 5 تطبيقات لازم عندك"] },
-  { id: "cooking", name: "الطبخ 🍳", en: ["3 ingredients dinner in 10 minutes", "This recipe broke the internet", "Crispy chicken secret", "Pasta in 5 minutes", "Best breakfast ever", "Stop cooking rice like this", "Viral pasta recipe", "Cheap meal that tastes expensive", "My grandmother's secret recipe", "Easy dessert with 2 ingredients"], ar: ["عشا بـ 3 مكونات بـ 10 دقايق", "هاي الوصفة كسرت النت", "سر الدجاج المقرمش", "باستا بـ 5 دقايق", "أطيب فطور بالعالم", "وقف تطبخ الرز هيك", "وصفة الباستا الترند", "أكلة رخيصة طعمها فخم", "وصفة ستي السرية", "حلو سهل بمكونين"] },
+  { id: "money", name: "المال 💰",
+    en: [
+      "How to build a side business with $100",
+      "How to invest $100 and grow it",
+      "How to make $1000 extra every month",
+      "How to start investing with no experience",
+      "How to turn your salary into wealth",
+      "How to build passive income from zero",
+      "How to save $10000 in one year",
+      "How to make money while you sleep",
+      "How to start a business with no money",
+      "How to invest in stocks for beginners",
+      "How to escape the 9-5 job",
+      "How to build wealth in your 20s",
+      "How to make your first $1000 online",
+      "How to grow $500 into $5000",
+      "How to stop living paycheck to paycheck",
+    ],
+    ar: [
+      "كيف تبني شغل إضافي بـ 100$",
+      "كيف تستثمر 100$ وتكبرهم",
+      "كيف تعمل 1000$ زيادة كل شهر",
+      "كيف تبدأ تستثمر بدون خبرة",
+      "كيف تحوّل راتبك لثروة",
+      "كيف تبني دخل سلبي من الصفر",
+      "كيف توفّر 10000$ بسنة وحدة",
+      "كيف تعمل مصاري وانت نايم",
+      "كيف تبدأ مشروع بدون مصاري",
+      "كيف تستثمر بالأسهم للمبتدئين",
+      "كيف تهرب من وظيفة 9-5",
+      "كيف تبني ثروة بعمر العشرين",
+      "كيف تعمل أول 1000$ أونلاين",
+      "كيف تحوّل 500$ لـ 5000$",
+      "كيف تبطل تعيش من راتب لراتب",
+    ] },
+  { id: "health", name: "الصحة 🥗",
+    en: [
+      "How to lose belly fat in 30 days",
+      "How to sleep better tonight",
+      "How to gain energy in 7 days",
+      "How to eat healthy on a budget",
+      "How to build a morning routine that works",
+      "How to stop sugar cravings",
+      "How to lose 10kg without gym",
+      "How to fix your back pain at home",
+      "How to live longer - 5 simple habits",
+      "How to boost your immune system",
+    ],
+    ar: [
+      "كيف تنحف بطنك بـ 30 يوم",
+      "كيف تنام أحسن الليلة",
+      "كيف تزيد طاقتك بـ 7 أيام",
+      "كيف تاكل صحي بميزانية قليلة",
+      "كيف تبني روتين صباحي ناجح",
+      "كيف توقف اشتهاء السكر",
+      "كيف تخسر 10 كيلو بدون جيم",
+      "كيف تعالج وجع ظهرك بالبيت",
+      "كيف تعيش أطول - 5 عادات بسيطة",
+      "كيف تقوي مناعتك",
+    ] },
+  { id: "tech", name: "التقنية 📱",
+    en: [
+      "How to make money with AI in 2026",
+      "How to use ChatGPT to make money",
+      "How to start a faceless YouTube channel",
+      "How to protect your phone from hackers",
+      "How to make $500 with your phone",
+      "How to learn AI in 7 days",
+      "How to automate your work with AI",
+      "How to build an app with no code",
+      "How to grow on TikTok in 2026",
+      "How to make money with Canva",
+    ],
+    ar: [
+      "كيف تعمل مصاري بالذكاء الاصطناعي 2026",
+      "كيف تستخدم شات جي بي تي لتعمل مصاري",
+      "كيف تبدأ قناة يوتيوب بدون وجه",
+      "كيف تحمي تلفونك من الهكر",
+      "كيف تعمل 500$ من تلفونك",
+      "كيف تتعلم الذكاء الاصطناعي بـ 7 أيام",
+      "كيف تأتمت شغلك بالذكاء الاصطناعي",
+      "كيف تبني تطبيق بدون برمجة",
+      "كيف تكبر على تيك توك 2026",
+      "كيف تعمل مصاري من كانفا",
+    ] },
+  { id: "cooking", name: "الطبخ 🍳",
+    en: [
+      "How to cook a full dinner in 10 minutes",
+      "How to make crispy chicken at home",
+      "How to cook perfect rice every time",
+      "How to make pasta like Italians",
+      "How to meal prep for the whole week",
+      "How to make healthy breakfast in 5 minutes",
+      "How to bake bread with 3 ingredients",
+      "How to make restaurant food at home",
+    ],
+    ar: [
+      "كيف تطبخ عشا كامل بـ 10 دقايق",
+      "كيف تعمل دجاج مقرمش بالبيت",
+      "كيف تطبخ رز مظبوط كل مرة",
+      "كيف تعمل باستا زي الطليان",
+      "كيف تجهز أكل الأسبوع كامل",
+      "كيف تعمل فطور صحي بـ 5 دقايق",
+      "كيف تخبز خبز بـ 3 مكونات",
+      "كيف تعمل أكل مطاعم بالبيت",
+    ] },
 ];
 
 const BACKGROUNDS = [
@@ -25,6 +127,9 @@ const COUNTRIES = [
   { id: "UAE", name: "الإمارات 🇦🇪", city: "Dubai, UAE", time: "7:00 - 9:00 مساءً", diff: "الإمارات قدامنا بساعة" },
   { id: "SA", name: "السعودية 🇸🇦", city: "Riyadh, SA", time: "8:00 - 10:00 مساءً", diff: "السعودية نفس توقيتنا" },
 ];
+
+// ايموجي لكل نقطة - بدل الدوائر الصفرا
+const TIP_ICONS = ["💰", "📈", "✂️", "🚀", "⭐"];
 
 export default function Home() {
   const [niche, setNiche] = useState("money");
@@ -56,17 +161,17 @@ export default function Home() {
   };
 
   const tips = isEnglish ? [
-    "Start today, don't wait",
-    "Save 20% of your income",
-    "Cut useless expenses",
-    "Build a side income",
-    "Invest in yourself",
+    "Start with $100, not $10,000",
+    "Save 20% before you spend",
+    "Cut 3 useless subscriptions",
+    "Build one side income first",
+    "Invest in skills, then stocks",
   ] : [
-    "ابدأ اليوم، لا تنتظر",
-    "وفّر 20% من دخلك",
-    "اقطع المصاريف الفاضية",
-    "ابني دخل إضافي",
-    "استثمر في نفسك",
+    "ابدأ بـ 100$ مش بـ 10000$",
+    "وفّر 20% قبل ما تصرف",
+    "الغي 3 اشتراكات فاضية",
+    "ابني دخل إضافي واحد أول",
+    "استثمر بمهاراتك بعدين بالأسهم",
   ];
 
   const caption = isEnglish
@@ -83,14 +188,12 @@ export default function Home() {
     <div className="min-h-screen bg-[#111111] flex justify-center">
       <div className="w-full max-w-[520px] bg-black text-white min-h-screen px-5 py-7 shadow-2xl border-x border-zinc-800">
 
-        {/* هيدر */}
         <div className="text-center mb-8">
           <div className="text-4xl mb-2">🎬</div>
           <h1 className="text-[26px] font-black leading-tight">صانع ريلز فيسبوك</h1>
           <p className="text-zinc-400 text-[13px] mt-2">ولّد فيديو فيرال بـ 2 دقيقة</p>
         </div>
 
-        {/* النيش - أزرار مفصولة */}
         <div className="mb-7">
           <p className="text-[14px] font-bold mb-3">🎯 اختار النيش</p>
           <div className="grid grid-cols-2 gap-3">
@@ -103,7 +206,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* الدولة - أزرار مفصولة */}
         <div className="mb-7">
           <p className="text-[14px] font-bold mb-3">🌍 الدولة المستهدفة</p>
           <div className="grid grid-cols-2 gap-3">
@@ -119,20 +221,17 @@ export default function Home() {
           </p>
         </div>
 
-        {/* زر التوليد الكبير */}
         <div className="mb-3">
           <button onClick={generate} className="w-full bg-yellow-400 text-black font-black py-4 rounded-2xl text-[16px] shadow-lg shadow-yellow-400/20 active:scale-[0.98] transition-all">
             {loading ? "جاري التوليد... ⏳" : "✨ ولّد بـ Gemini"}
           </button>
         </div>
 
-        {/* الزرين الصغار - مفصولين */}
         <div className="flex gap-3 mb-8">
           <button onClick={generate} className="flex-1 bg-zinc-900 border border-zinc-800 py-3 rounded-2xl text-[13px] font-bold hover:bg-zinc-800 transition-all">🔄 10 مواضيع جديدة</button>
           <button onClick={randomTopic} className="flex-1 bg-zinc-900 border border-zinc-800 py-3 rounded-2xl text-[13px] font-bold hover:bg-zinc-800 transition-all">🎲 موضوع عشوائي</button>
         </div>
 
-        {/* المواضيع */}
         {topics.length > 0 && (
           <div className="mb-8">
             <h3 className="font-bold text-[15px] mb-3">🔥 اختار هوك:</h3>
@@ -149,7 +248,6 @@ export default function Home() {
 
         {selectedTopic && (
           <>
-            {/* الخلفيات */}
             <div className="mb-8">
               <h3 className="font-bold text-[15px] mb-3">🖼️ اختار خلفية:</h3>
               <div className="grid grid-cols-4 gap-3">
@@ -163,30 +261,33 @@ export default function Home() {
               </div>
             </div>
 
-            {/* المعاينة */}
+            {/* المعاينة - الستايل الجديد */}
             <div className="flex justify-center mb-5">
               <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-zinc-900">
                 <img src={selectedBg.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
-                <div className="absolute inset-0 bg-black/60" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
                   <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center mt-7 drop-shadow-lg">{selectedTopic}</p>
-                  <div className="space-y-2">
+
+                  {/* النقاط الجديدة - زجاجية بدون أصفر */}
+                  <div className="space-y-2.5">
                     {tips.map((t, i) => (
-                      <p key={t} dir={isEnglish ? "ltr" : "rtl"} className="bg-black/70 backdrop-blur rounded-xl px-3 py-2.5 text-[12px] text-left flex gap-2">
-                        <span className="bg-yellow-400 text-black w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black shrink-0">{i + 1}</span>
-                        <span>{t.replace(/^\d+\.\s/, "")}</span>
-                      </p>
+                      <div key={t} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 shadow-lg">
+                        <span className="text-[18px] leading-none shrink-0">{TIP_ICONS[i]}</span>
+                        <span className="text-white text-[13px] font-semibold leading-snug text-left">{t}</span>
+                        <span className="mr-auto text-white/40 text-[12px]">→</span>
+                      </div>
                     ))}
                   </div>
+
                   <p className="text-center text-[10px] text-zinc-300">@ yourpage • Follow for more</p>
                 </div>
-                <span className="absolute top-3 left-3 bg-black/70 text-[10px] px-2.5 py-1 rounded-full">20 ثانية</span>
+                <span className="absolute top-3 left-3 bg-black/70 backdrop-blur text-[10px] px-2.5 py-1 rounded-full">20 ثانية</span>
               </div>
             </div>
 
             <button className="w-full bg-green-500 font-black py-4 rounded-2xl mb-8 shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all">⬇️ تحميل فيديو - 20 ثانية</button>
 
-            {/* الكابشن */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-5">
               <h4 className="font-bold mb-3">📝 الكابشن + الهاشتاغات</h4>
               <p dir={isEnglish ? "ltr" : "rtl"} className="text-[13px] text-zinc-300 whitespace-pre-line leading-relaxed text-left">{caption}</p>
@@ -195,7 +296,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* اللوكيشن */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-5">
               <h4 className="font-bold mb-2">📍 وين تحط اللوكيشن؟</h4>
               <p dir="ltr" className="text-[16px] font-black text-left">📍 {currentCountry.city}</p>
@@ -203,7 +303,6 @@ export default function Home() {
               <p className="text-[12px] bg-yellow-900/40 text-yellow-200 p-3 rounded-xl mt-3">⚠️ مهم: لا تشغل GPS وانت بتنشر - حط اللوكيشن يدوياً</p>
             </div>
 
-            {/* دليل النشر */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-7">
               <h4 className="font-bold mb-3">✍️ كيف تنشر على فيس ريلز؟</h4>
               <div className="space-y-2.5 text-[13px] text-zinc-300 leading-relaxed">
