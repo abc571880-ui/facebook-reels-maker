@@ -122,14 +122,15 @@ const BACKGROUNDS = [
 ];
 
 const COUNTRIES = [
-  { id: "USA", name: "أمريكا 🇺🇸", city: "New York, USA", time: "7:00 - 9:00 مساءً EST", diff: "أمريكا ورانا بـ 7 ساعات" },
-  { id: "UK", name: "بريطانيا 🇬🇧", city: "London, UK", time: "6:00 - 8:00 مساءً GMT", diff: "بريطانيا ورانا بـ 2 ساعة" },
-  { id: "UAE", name: "الإمارات 🇦🇪", city: "Dubai, UAE", time: "7:00 - 9:00 مساءً", diff: "الإمارات قدامنا بساعة" },
-  { id: "SA", name: "السعودية 🇸🇦", city: "Riyadh, SA", time: "8:00 - 10:00 مساءً", diff: "السعودية نفس توقيتنا" },
+  { id: "USA", name: "أمريكا 🇺🇸", city: "New York, USA", time: "7:00 - 9:00 مساءً EST", diff: "أمريكا ورانا بـ 7 ساعات",
+    hashtags: "#USA #America #NewYork #MoneyTips #SideHustle #Investing #PassiveIncome #FinancialFreedom #MakeMoneyOnline #USAMoney #AmericanDream #WealthBuilding #EntrepreneurUSA #FinanceUSA #MoneyMindset" },
+  { id: "UK", name: "بريطانيا 🇬🇧", city: "London, UK", time: "6:00 - 8:00 مساءً GMT", diff: "بريطانيا ورانا بـ 2 ساعة",
+    hashtags: "#UK #London #UKMoney #British #MoneyTipsUK #InvestingUK #SideHustleUK #FinancialFreedomUK #MakeMoneyUK #LondonLife #UKEntrepreneur #FinanceUK #WealthUK #MoneyUK" },
+  { id: "UAE", name: "الإمارات 🇦🇪", city: "Dubai, UAE", time: "7:00 - 9:00 مساءً", diff: "الإمارات قدامنا بساعة",
+    hashtags: "#الامارات #دبي #ابوظبي #فلوس #استثمار #دخل_اضافي #تجارة #مشاريع #دبي_لايف #المال #ثراء #ريادة_اعمال #الامارات_اليوم #فلوسي" },
+  { id: "SA", name: "السعودية 🇸🇦", city: "Riyadh, SA", time: "8:00 - 10:00 مساءً", diff: "السعودية نفس توقيتنا",
+    hashtags: "#السعودية #الرياض #جدة #فلوس #استثمار #دخل_اضافي #تجارة #مشاريع #السعودية_اليوم #المال #ثراء #ريادة_اعمال #رؤية_2030 #فلوسي" },
 ];
-
-// ايموجي لكل نقطة - بدل الدوائر الصفرا
-const TIP_ICONS = ["💰", "📈", "✂️", "🚀", "⭐"];
 
 export default function Home() {
   const [niche, setNiche] = useState("money");
@@ -174,9 +175,10 @@ export default function Home() {
     "استثمر بمهاراتك بعدين بالأسهم",
   ];
 
+  // كابشن طويل يشد المشاهد + هاشتاغات مستهدفة حسب الدولة
   const caption = isEnglish
-    ? `${selectedTopic}\n\nSave this video! Follow for more daily tips 🔥\n\n#facebookreels #viralreels #money #fyp #reels #viral #trending`
-    : `${selectedTopic}\n\nاحفظ الفيديو! تابعني لنصايح يومية 🔥\n\n#ريلز #فيسبوك #مال #فلوس #ترند`;
+    ? `${selectedTopic} 👇\n\nMost people think you need a lot of money to start.\nTruth is: you just need the right steps.\n\nIn this video I break down 5 simple steps you can start TODAY - even if you have $0 experience.\n\nStep 1 will surprise you.\nStep 5 is what rich people never tell you.\n\nSave this video so you don't lose it 📌\nShare it with someone who needs to hear this.\nComment "START" and I'll send you the full guide.\n\nFollow for daily money tips - I post every day at 7PM EST 🔥\n\n.\n.\n.\n${currentCountry.hashtags}\n\n#facebookreels #viralreels #fyp #reels #viral #trending #moneytok`
+    : `${selectedTopic} 👇\n\nأغلب الناس بيفكرو انو لازم يكون معك مصاري كتير عشان تبدأ.\nالحقيقة: انت بس محتاج الخطوات الصح.\n\nبهاد الفيديو شرحتلك 5 خطوات بسيطة بتبلش فيهم اليوم - حتى لو خبرتك صفر.\n\nالخطوة 1 راح تفاجئك.\nالخطوة 5 الأغنياء ما بيحكولك ياها.\n\nاحفظ الفيديو عشان ما يضيع منك 📌\nابعته لحدا محتاج يسمع هاد الكلام.\nاكتب "ابدأ" بالتعليقات وببعتلك الدليل الكامل.\n\nتابعني لنصايح يومية عن المال - بنزل كل يوم 🔥\n\n.\n.\n.\n${currentCountry.hashtags}\n\n#ريلز #فيسبوك #ترند #فايرل #مال #فلوس`;
 
   const copyCaption = () => {
     navigator.clipboard.writeText(caption);
@@ -261,7 +263,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* المعاينة - الستايل الجديد */}
             <div className="flex justify-center mb-5">
               <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-zinc-900">
                 <img src={selectedBg.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
@@ -269,13 +270,13 @@ export default function Home() {
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
                   <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center mt-7 drop-shadow-lg">{selectedTopic}</p>
 
-                  {/* النقاط الجديدة - زجاجية بدون أصفر */}
+                  {/* النقاط الجديدة - أرقام عادية + زجاجي بدون ستيكرات */}
                   <div className="space-y-2.5">
                     {tips.map((t, i) => (
                       <div key={t} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 shadow-lg">
-                        <span className="text-[18px] leading-none shrink-0">{TIP_ICONS[i]}</span>
+                        <span className="text-white/90 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
+                        <span className="w-px h-6 bg-white/20 shrink-0"></span>
                         <span className="text-white text-[13px] font-semibold leading-snug text-left">{t}</span>
-                        <span className="mr-auto text-white/40 text-[12px]">→</span>
                       </div>
                     ))}
                   </div>
@@ -291,9 +292,13 @@ export default function Home() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-5">
               <h4 className="font-bold mb-3">📝 الكابشن + الهاشتاغات</h4>
               <p dir={isEnglish ? "ltr" : "rtl"} className="text-[13px] text-zinc-300 whitespace-pre-line leading-relaxed text-left">{caption}</p>
-              <button onClick={copyCaption} className="w-full bg-green-600 py-3.5 rounded-2xl mt-4 font-bold text-[14px] active:scale-[0.98] transition-all">
-                {copied ? "✅ تم النسخ!" : "📋 نسخ الكابشن + الهاشتاغات"}
-              </button>
+              <div className="flex gap-2 mt-4">
+                <button onClick={copyCaption} className="flex-1 bg-green-600 py-3.5 rounded-2xl font-bold text-[14px] active:scale-[0.98] transition-all">
+                  {copied ? "✅ تم النسخ!" : "📋 نسخ الكابشن"}
+                </button>
+                <button onClick={() => { navigator.clipboard.writeText(currentCountry.hashtags); setCopied(true); setTimeout(()=>setCopied(false),2000); }} className="flex-1 bg-zinc-800 border border-zinc-700 py-3.5 rounded-2xl font-bold text-[14px] active:scale-[0.98] transition-all">🏷️ نسخ الهاشتاغات بس</button>
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-3 text-center">الهاشتاغات مستهدفة لـ {currentCountry.city} 🎯</p>
             </div>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-5">
