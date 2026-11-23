@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const NICHES = [
   { id: "money", name: "المال 💰",
@@ -44,10 +44,27 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [previewCount, setPreviewCount] = useState(5);
 
   const isEnglish = country === "USA" || country === "UK";
   const currentCountry = COUNTRIES.find(c => c.id === country)!;
   const currentNiche = NICHES.find(n => n.id === niche)!;
+
+  // المعاينة: النقاط بتطلع وحدة وحدة وبتثبت
+  useEffect(() => {
+    if (!selectedTopic) return;
+    setPreviewCount(0);
+    const start = setTimeout(() => {
+      setPreviewCount(1);
+      const interval = setInterval(() => {
+        setPreviewCount(prev => {
+          if (prev >= 5) { clearInterval(interval); return prev; }
+          return prev + 1;
+        });
+      }, 1800);
+    }, 1000);
+    return () => clearTimeout(start);
+  }, [selectedTopic, selectedBg]);
 
   const generate = () => {
     setLoading(true);
@@ -114,7 +131,10 @@ export default function Home() {
         if (cur.trim()) lines.push(cur.trim());
         const titleY = 320 + Math.min(time * 0.05, 30) - 30;
         lines.forEach((line, i) => ctx.fillText(line, 540, titleY + i * 90));
-        tips.forEach((tip, i) => {
+        // ===== التعديل هون: نقاط وحدة وحدة وبتثبت - 10 ثواني =====
+        const visibleCount = time < 1000 ? 0 : Math.min(tips.length, Math.floor((time - 1000) / 1800) + 1);
+        const visibleTips = tips.slice(0, visibleCount);
+        visibleTips.forEach((tip, i) => {
           const y = 950 + i * 160;
           ctx.fillStyle = "rgba(255,255,255,0.14)";
           ctx.beginPath(); ctx.roundRect(80, y, 920, 120, 32); ctx.fill();
@@ -241,7 +261,7 @@ export default function Home() {
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
                   <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center mt-7 drop-shadow-lg">{selectedTopic}</p>
                   <div className="space-y-2.5">
-                    {tips.map((t, i) => (
+                    {tips.slice(0, previewCount).map((t, i) => (
                       <div key={t} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 shadow-lg">
                         <span className="text-white/90 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
                         <span className="w-px h-6 bg-white/20 shrink-0"></span>
@@ -269,7 +289,6 @@ export default function Home() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-5">
               <h4 className="font-bold mb-3">📝 الكابشن + الهاشتاغات</h4>
               <p dir={isEnglish ? "ltr" : "rtl"} className="text-[13px] text-zinc-300 whitespace-pre-line leading-relaxed text-left">{caption}</p>
-              {/* زر واحد - بينسخ كلشي */}
               <button onClick={copyCaption} className="w-full bg-green-600 py-4 rounded-2xl mt-4 font-bold text-[15px] active:scale-[0.98] transition-all shadow-lg shadow-green-600/20">
                 {copied ? "✅ تم النسخ! الصقو بفيسبوك" : "📋 نسخ الكابشن + الهاشتاغات"}
               </button>
