@@ -1,14 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// ===== مولد أفكار لا نهائي - كل مرة أفكار جديدة =====
-const HOOK_STARTS_EN = ["Nobody tells you this","Stop doing this","7 secrets","I wish I knew this","The truth about","Why you're still broke","This changed my life","Do this for 30 days","The rich hide this","Warning","3 mistakes","How I made","Secret","What if I told you","Read this before"];
-const HOOK_STARTS_AR = ["ماحدا بيحكيلك هاد","وقف تعمل هيك","7 أسرار","ياريتني عرفت هاد","الحقيقة عن","ليش انت لسا مفلس","هاد غيّر حياتي","اعمل هيك 30 يوم","الأغنياء مخبين هاد","تحذير","3 أخطاء","كيف عملت","سر خطير","لو قلتلك","اقرأ هاد قبل"];
-const TOPIC_WORDS_EN = ["money","saving","investing","passive income","side hustle","wealth","stocks","budget","freedom","business","AI money","online income"];
-const TOPIC_WORDS_AR = ["الفلوس","التوفير","الاستثمار","الدخل السلبي","شغل إضافي","الثروة","الأسهم","الميزانية","الحرية المالية","المشاريع","مصاري الذكاء الاصطناعي","الدخل أونلاين"];
-const HOOK_ENDS_EN = ["in 2026","while you sleep","with $100","in 7 days","from home","with no experience","before 30","everyone ignores","that works","in 2026"];
-const HOOK_ENDS_AR = ["بـ 2026","وانت نايم","بـ 100$","بـ 7 أيام","من البيت","بدون خبرة","قبل الـ 30","الكل بيطنشو","اللي بتشتغل","بـ 2026"];
-const NUMBERS = ["3","5","7","9","10","11"];
+const HOOK_STARTS_EN = ["Nobody tells you this","Stop doing this","I wish I knew this","The truth about","Why you're still broke","This changed my life","Do this for 30 days","The rich hide this","Warning","What if I told you","Read this before"];
+const HOOK_STARTS_AR = ["ماحدا بيحكيلك هاد","وقف تعمل هيك","ياريتني عرفت هاد","الحقيقة عن","ليش انت لسا مفلس","هاد غيّر حياتي","اعمل هيك 30 يوم","الأغنياء مخبين هاد","تحذير","لو قلتلك","اقرأ هاد قبل"];
+const TOPIC_WORDS_EN = ["your savings","your money","your wealth","your budget","your income","your investments","your side hustle","your financial freedom"];
+const TOPIC_WORDS_AR = ["مدخراتك","فلوسك","ثروتك","ميزانيتك","دخلك","استثماراتك","شغلك الإضافي","حريتك المالية"];
+const HOOK_ENDS_EN = ["in 2026","while you sleep","with $100","in 7 days","from home","with no experience","before 30","that everyone ignores","that actually works"];
+const HOOK_ENDS_AR = ["بـ 2026","وانت نايم","بـ 100$","بـ 7 أيام","من البيت","بدون خبرة","قبل الـ 30","الكل بيطنشها","اللي بتشتغل فعلاً"];
 
 const NICHES = [
   { id: "money", name: "المال 💰" },
@@ -17,17 +15,28 @@ const NICHES = [
   { id: "cooking", name: "الطبخ 🍳" },
 ];
 
-const TIPS_POOL_EN: Record<string,string[]> = {
-  money: ["Start with $100","Save 20% first","Cut 3 subscriptions","One side income","Skills then stocks","Track every dollar","No impulse buys","Emergency fund first","Invest monthly","Learn then earn","Automate savings","Avoid bad debt"],
-  health: ["Drink 2L water","Sleep 8 hours","Walk 30 min","No sugar today","Eat more protein","Morning sun","Stretch daily","No phone at night","Eat slow","Breathe deep","Less salt","Move hourly"],
-  tech: ["Use AI daily","Learn one tool","Automate tasks","Protect passwords","Backup data","One app a day","No useless apps","Learn prompt","Post daily","Build in public","Use Canva","Sell online"],
-  cooking: ["Prep on Sunday","3 ingredients only","Cook in 10 min","Taste while cooking","Sharp knife","Fresh herbs","One pot meal","Freeze leftovers","Season early","Hot pan first","Simple wins","Clean as you go"],
+// النقاط هلأ مرتبطة بالموضوع - كل موضوع إلو نقاطو الخاصة
+const TIPS_BY_TOPIC_EN: Record<string,string[]> = {
+  savings: ["Save 20% first","Automate savings","Cut 3 subscriptions","No impulse buys","Emergency fund first","Track every dollar"],
+  money: ["Start with $100","One side income","Learn then earn","Avoid bad debt","Invest monthly","Skills then stocks"],
+  wealth: ["Invest monthly","Skills then stocks","Learn then earn","Avoid bad debt","Build assets","Think long term"],
+  budget: ["Track every dollar","Cut 3 subscriptions","No impulse buys","Plan weekly","Save 20% first","Cash only"],
+  income: ["One side income","Sell a skill","Learn then earn","Post daily","Build audience","Automate sales"],
+  investments: ["Start with $100","Invest monthly","Learn then earn","Think long term","Diversify","Start early"],
+  hustle: ["One side income","Sell a skill","Post daily","Learn then earn","Build audience","Start small"],
+  freedom: ["Passive income first","Invest monthly","Automate savings","Build assets","Think long term","Avoid bad debt"],
+  default: ["Start with $100","Save 20% first","Cut 3 subscriptions","One side income","Skills then stocks","Track every dollar"],
 };
-const TIPS_POOL_AR: Record<string,string[]> = {
-  money: ["ابدأ بـ 100$","وفّر 20% أول","الغي 3 اشتراكات","دخل إضافي واحد","مهارتك بعدين أسهم","راقب كل دولار","بلا مشتريات فجأة","صندوق طوارئ أول","استثمر شهرياً","تعلم بعدين اربح","أتمت التوفير","ابعد عن الديون"],
-  health: ["اشرب 2 لتر مي","نام 8 ساعات","امشي 30 دقيقة","بلا سكر اليوم","كل بروتين أكتر","شمس الصبح","تمدد يومياً","بلا تلفون بالليل","كل على مهل","تنفس عميق","ملح أقل","تحرك كل ساعة"],
-  tech: ["استخدم الذكاء يومياً","تعلم أداة وحدة","أتمت شغلك","احمي كلمات السر","انسخ بياناتك","تطبيق واحد باليوم","بلا تطبيقات فاضية","تعلم البرومبت","انشر يومياً","ابني قدام الناس","استخدم كانفا","بيع أونلاين"],
-  cooking: ["جهز يوم الأحد","3 مكونات بس","اطبخ بـ 10 دقايق","دوق وانت بتطبخ","سكين حاد","أعشاب طازة","طبخة طنجرة وحدة","فرّز الباقي","بهّر بدري","مقلاية سخنة أول","البسيط بيكسب","نضف وانت بتطبخ"],
+const TIPS_BY_TOPIC_AR: Record<string,string[]> = {
+  savings: ["وفّر 20% أول","أتمت التوفير","الغي 3 اشتراكات","بلا مشتريات فجأة","صندوق طوارئ أول","راقب كل دولار"],
+  money: ["ابدأ بـ 100$","دخل إضافي واحد","تعلم بعدين اربح","ابعد عن الديون","استثمر شهرياً","مهارتك بعدين أسهم"],
+  wealth: ["استثمر شهرياً","مهارتك بعدين أسهم","تعلم بعدين اربح","ابعد عن الديون","ابني أصول","فكّر لبعيد"],
+  budget: ["راقب كل دولار","الغي 3 اشتراكات","بلا مشتريات فجأة","خطط أسبوعياً","وفّر 20% أول","كاش بس"],
+  income: ["دخل إضافي واحد","بيع مهارة","تعلم بعدين اربح","انشر يومياً","ابني جمهور","أتمت المبيعات"],
+  investments: ["ابدأ بـ 100$","استثمر شهرياً","تعلم بعدين اربح","فكّر لبعيد","نوّع استثماراتك","ابدأ بدري"],
+  hustle: ["دخل إضافي واحد","بيع مهارة","انشر يومياً","تعلم بعدين اربح","ابني جمهور","ابدأ صغير"],
+  freedom: ["دخل سلبي أول","استثمر شهرياً","أتمت التوفير","ابني أصول","فكّر لبعيد","ابعد عن الديون"],
+  default: ["ابدأ بـ 100$","وفّر 20% أول","الغي 3 اشتراكات","دخل إضافي واحد","مهارتك بعدين أسهم","راقب كل دولار"],
 };
 
 const BACKGROUNDS = [
@@ -59,16 +68,32 @@ function makeUniqueTopics(isEnglish: boolean, count: number, used: string[]) {
     const s = starts[Math.floor(Math.random() * starts.length)];
     const w = words[Math.floor(Math.random() * words.length)];
     const e = ends[Math.floor(Math.random() * ends.length)];
-    const n = NUMBERS[Math.floor(Math.random() * NUMBERS.length)];
     const style = Math.floor(Math.random() * 4);
     let t = "";
-    if (style === 0) t = isEnglish ? `${s} about ${w} ${e}` : `${s} عن ${w} ${e}`;
-    else if (style === 1) t = isEnglish ? `${n} ways to grow ${w} ${e}` : `${n} طرق لتكبير ${w} ${e}`;
-    else if (style === 2) t = isEnglish ? `How to master ${w} ${e}` : `كيف تتقن ${w} ${e}`;
-    else t = isEnglish ? `${s}: ${w} ${e}` : `${s}: ${w} ${e}`;
+    if (style === 0) t = isEnglish ? `5 ways to grow ${w} ${e}` : `5 طرق لتكبير ${w} ${e}`;
+    else if (style === 1) t = isEnglish ? `5 secrets about ${w} ${e}` : `5 أسرار عن ${w} ${e}`;
+    else if (style === 2) t = isEnglish ? `${s} - 5 steps for ${w}` : `${s} - 5 خطوات لـ ${w}`;
+    else t = isEnglish ? `How to master ${w} in 5 steps ${e}` : `كيف تتقن ${w} بـ 5 خطوات ${e}`;
     if (!out.includes(t) && !used.includes(t)) out.push(t);
   }
   return out;
+}
+
+// بيطلع النقاط حسب الكلمة اللي بالعنوان
+function getTipsForTopic(topic: string, isEnglish: boolean) {
+  const map = isEnglish ? TIPS_BY_TOPIC_EN : TIPS_BY_TOPIC_AR;
+  const lower = topic.toLowerCase();
+  let key = "default";
+  if (lower.includes("saving") || topic.includes("مدخرات")) key = "savings";
+  else if (lower.includes("wealth") || topic.includes("ثروت")) key = "wealth";
+  else if (lower.includes("budget") || topic.includes("ميزاني")) key = "budget";
+  else if (lower.includes("income") || topic.includes("دخل")) key = "income";
+  else if (lower.includes("invest") || topic.includes("استثمار")) key = "investments";
+  else if (lower.includes("hustle") || topic.includes("إضافي")) key = "hustle";
+  else if (lower.includes("freedom") || topic.includes("حرية")) key = "freedom";
+  else if (lower.includes("money") || topic.includes("فلوس")) key = "money";
+  const pool = map[key] || map.default;
+  return [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
 }
 
 export default function Home() {
@@ -83,7 +108,8 @@ export default function Home() {
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [previewCount, setPreviewCount] = useState(1);
-  const [currentTips, setCurrentTips] = useState<string[]>(TIPS_POOL_EN.money.slice(0,5));
+  const [currentTips, setCurrentTips] = useState<string[]>(TIPS_BY_TOPIC_EN.default.slice(0,5));
+  const [typedText, setTypedText] = useState("");
 
   const isEnglish = country === "USA" || country === "UK";
   const currentCountry = COUNTRIES.find(c => c.id === country)!;
@@ -100,10 +126,23 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [selectedTopic]);
 
-  const pickTips = () => {
-    const pool = isEnglish ? TIPS_POOL_EN[niche] : TIPS_POOL_AR[niche];
-    const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
-    setCurrentTips(shuffled);
+  // تأثير الكتابة حرف حرف للمعاينة
+  useEffect(() => {
+    if (!selectedTopic || currentTips.length === 0) return;
+    const currentTip = currentTips[Math.min(previewCount - 1, 4)];
+    if (!currentTip) return;
+    setTypedText("");
+    let i = 0;
+    const typing = setInterval(() => {
+      i++;
+      setTypedText(currentTip.slice(0, i));
+      if (i >= currentTip.length) clearInterval(typing);
+    }, 35);
+    return () => clearInterval(typing);
+  }, [previewCount, selectedTopic, currentTips]);
+
+  const pickTips = (topic: string) => {
+    setCurrentTips(getTipsForTopic(topic, isEnglish));
   };
 
   const generate = () => {
@@ -113,7 +152,7 @@ export default function Home() {
       setUsedTopics(prev => [...prev, ...fresh].slice(-100));
       setTopics(fresh);
       setSelectedTopic(fresh[0]);
-      pickTips();
+      pickTips(fresh[0]);
       setLoading(false);
     }, 500);
   };
@@ -122,14 +161,14 @@ export default function Home() {
     const fresh = makeUniqueTopics(isEnglish, 1, [...usedTopics, ...topics]);
     setUsedTopics(prev => [...prev, ...fresh].slice(-100));
     setSelectedTopic(fresh[0]);
-    pickTips();
+    pickTips(fresh[0]);
   };
 
   const tips = currentTips;
 
   const caption = isEnglish
-    ? `${selectedTopic} 👇\n\nMost people think you need a lot of money to start.\nTruth is: you just need the right steps.\n\nIn this video I break down 5 simple steps you can start TODAY - even if you have $0 experience.\n\nStep 1 will surprise you.\nStep 5 is what rich people never tell you.\n\nSave this video so you don't lose it 📌\nShare it with someone who needs to hear this.\nComment "START" and I'll send you the full guide.\n\nFollow for daily money tips - I post every day at 7PM EST 🔥\n\n.\n.\n.\n${currentCountry.hashtags}\n\n#facebookreels #viralreels #fyp #reels #viral #trending #moneytok`
-    : `${selectedTopic} 👇\n\nأغلب الناس بيفكرو انو لازم يكون معك مصاري كتير عشان تبدأ.\nالحقيقة: انت بس محتاج الخطوات الصح.\n\nبهاد الفيديو شرحتلك 5 خطوات بسيطة بتبلش فيهم اليوم - حتى لو خبرتك صفر.\n\nالخطوة 1 راح تفاجئك.\nالخطوة 5 الأغنياء ما بيحكولك ياها.\n\nاحفظ الفيديو عشان ما يضيع منك 📌\nابعته لحدا محتاج يسمع هاد الكلام.\nاكتب "ابدأ" بالتعليقات وببعتلك الدليل الكامل.\n\nتابعني لنصايح يومية عن المال - بنزل كل يوم 🔥\n\n.\n.\n.\n${currentCountry.hashtags}\n\n#ريلز #فيسبوك #ترند #فايرل #مال #فلوس`;
+    ? `${selectedTopic} 👇\n\nMost people think you need a lot of money to start.\nTruth is: you just need the right steps.\n\nIn this video I break down 5 simple steps you can start TODAY - even if you have $0 experience.\n\n${tips.map((t,i)=>`Step ${i+1}: ${t}`).join("\n")}\n\nSave this video so you don't lose it 📌\nShare it with someone who needs to hear this.\nComment "START" and I'll send you the full guide.\n\nFollow for daily money tips - I post every day at 7PM EST 🔥\n\n.\n.\n.\n${currentCountry.hashtags}\n\n#facebookreels #viralreels #fyp #reels #viral #trending #moneytok`
+    : `${selectedTopic} 👇\n\nأغلب الناس بيفكرو انو لازم يكون معك مصاري كتير عشان تبدأ.\nالحقيقة: انت بس محتاج الخطوات الصح.\n\nبهاد الفيديو شرحتلك 5 خطوات بسيطة بتبلش فيهم اليوم - حتى لو خبرتك صفر.\n\n${tips.map((t,i)=>`الخطوة ${i+1}: ${t}`).join("\n")}\n\nاحفظ الفيديو عشان ما يضيع منك 📌\nابعته لحدا محتاج يسمع هاد الكلام.\nاكتب "ابدأ" بالتعليقات وببعتلك الدليل الكامل.\n\nتابعني لنصايح يومية عن المال - بنزل كل يوم 🔥\n\n.\n.\n.\n${currentCountry.hashtags}\n\n#ريلز #فيسبوك #ترند #فايرل #مال #فلوس`;
 
   const copyCaption = () => {
     navigator.clipboard.writeText(caption);
@@ -178,7 +217,16 @@ export default function Home() {
           ctx.fillText(`0${i + 1}`, 130, y + 75);
           ctx.fillStyle = "rgba(255,255,255,0.25)"; ctx.fillRect(230, y + 25, 2, 70);
           ctx.font = "600 38px Arial";
-          ctx.fillText(tip, 260, y + 75);
+          // تأثير الكتابة: آخر نقطة بتنكتب حرف حرف، القديمة كاملة
+          let display = tip;
+          if (i === visibleCount - 1) {
+            const timeInThisPoint = time - i * 1200;
+            const charsToShow = Math.floor(timeInThisPoint / 35);
+            display = tip.slice(0, Math.max(1, charsToShow));
+            // مؤشر الكتابة |
+            if (charsToShow < tip.length) display += "|";
+          }
+          ctx.fillText(display, 260, y + 75);
         });
         if (visibleCount < 5) {
           ctx.fillStyle = "rgba(250,204,21,0.95)"; ctx.textAlign = "center"; ctx.font = "900 36px Arial";
@@ -264,7 +312,7 @@ export default function Home() {
             <h3 className="font-bold text-[15px] mb-3">🔥 اختار هوك جديد:</h3>
             <div className="space-y-3">
               {topics.slice(0, 5).map(t => (
-                <button key={t} onClick={() => { setSelectedTopic(t); pickTips(); }} dir={isEnglish ? "ltr" : "rtl"}
+                <button key={t} onClick={() => { setSelectedTopic(t); pickTips(t); }} dir={isEnglish ? "ltr" : "rtl"}
                   className={`w-full text-center p-4 rounded-2xl text-[14px] leading-relaxed transition-all ${selectedTopic === t ? "bg-yellow-400 text-black font-bold shadow-lg shadow-yellow-400/20" : "bg-zinc-900 border border-zinc-800 hover:bg-zinc-800"}`}>
                   {t}
                 </button>
@@ -286,6 +334,18 @@ export default function Home() {
                 ))}
               </div>
             </div>
+            <div className="mb-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+              <h3 className="font-bold text-[15px] mb-3">✍️ النقاط اللي راح تنكتب بالفيديو:</h3>
+              <div className="space-y-2">
+                {tips.map((t,i) => (
+                  <div key={i} className="flex gap-2 items-center text-[13px]">
+                    <span className="bg-yellow-400 text-black font-black w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0">{i+1}</span>
+                    <span className="text-zinc-200">{i === previewCount-1 && previewCount <=5 ? typedText + "|" : t}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-3">النقاط بتتغير حسب الموضوع اللي اخترتو 👆</p>
+            </div>
             <div className="flex justify-center mb-5">
               <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-zinc-900">
                 <img src={selectedBg.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
@@ -297,7 +357,7 @@ export default function Home() {
                       <div key={t} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 shadow-lg">
                         <span className="text-white/90 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
                         <span className="w-px h-6 bg-white/20 shrink-0"></span>
-                        <span className="text-white text-[13px] font-semibold leading-snug text-left">{t}</span>
+                        <span className="text-white text-[13px] font-semibold leading-snug text-left">{i === previewCount-1 ? typedText + "|" : t}</span>
                       </div>
                     ))}
                   </div>
