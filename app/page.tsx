@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const HOOK_STARTS_EN = ["Nobody tells you this","Stop doing this","I wish I knew this","The truth about","Why you're still broke","This changed my life","Do this for 30 days","The rich hide this","Warning","What if I told you","Read this before"];
 const HOOK_STARTS_AR = ["ماحدا بيحكيلك هاد","وقف تعمل هيك","ياريتني عرفت هاد","الحقيقة عن","ليش انت لسا مفلس","هاد غيّر حياتي","اعمل هيك 30 يوم","الأغنياء مخبين هاد","تحذير","لو قلتلك","اقرأ هاد قبل"];
@@ -107,38 +107,52 @@ export default function Home() {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [currentTips, setCurrentTips] = useState<string[]>(TIPS_BY_TOPIC_EN.default.slice(0,5));
   const [displayTips, setDisplayTips] = useState<string[]>([]);
+  const [typingIndex, setTypingIndex] = useState(-1);
+  const timeoutRef = useRef<any>(null);
 
   const isEnglish = country === "USA" || country === "UK";
   const currentCountry = COUNTRIES.find(c => c.id === country)!;
 
-  // تأثير الكتابة للمعاينة - حرف حرف، نقطة ورا نقطة
-  useEffect(() => {
-    if (!selectedTopic || currentTips.length === 0) return;
+  // ===== كتابة حقيقية للمعاينة - بطيئة وواضحة =====
+  const startTypingPreview = (tipsToType: string[]) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDisplayTips([]);
-    let tipIndex = 0;
-    let charIndex = 0;
+    setTypingIndex(-1);
+    let tipIdx = 0;
+    let charIdx = 0;
     let current: string[] = [];
-    const interval = setInterval(() => {
-      if (tipIndex >= currentTips.length) { clearInterval(interval); return; }
-      const fullTip = currentTips[tipIndex];
-      charIndex++;
-      const partial = fullTip.slice(0, charIndex);
-      const next = [...current];
-      next[tipIndex] = partial;
-      current = next;
-      setDisplayTips([...next]);
-      if (charIndex >= fullTip.length) {
-        // خلصت النقطة - استنى شوي وابدأ اللي بعدها
-        setTimeout(() => {}, 300);
-        tipIndex++;
-        charIndex = 0;
+    const typeNext = () => {
+      if (tipIdx >= tipsToType.length) { setTypingIndex(-1); return; }
+      const full = tipsToType[tipIdx];
+      // أول مرة - افتح صندوق فاضي
+      if (charIdx === 0) {
+        setTypingIndex(tipIdx);
+        current = [...current, ""];
+        setDisplayTips([...current]);
       }
-    }, 60);
-    return () => clearInterval(interval);
+      charIdx++;
+      current[tipIdx] = full.slice(0, charIdx);
+      setDisplayTips([...current]);
+      if (charIdx < full.length) {
+        timeoutRef.current = setTimeout(typeNext, 120); // كل حرف 120ms - بطيء وواضح
+      } else {
+        // خلصت النقطة - وقفة 400ms وبعدين اللي بعدها
+        tipIdx++;
+        charIdx = 0;
+        timeoutRef.current = setTimeout(typeNext, 400);
+      }
+    };
+    timeoutRef.current = setTimeout(typeNext, 500);
+  };
+
+  useEffect(() => {
+    if (selectedTopic && currentTips.length) startTypingPreview(currentTips);
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, [selectedTopic, currentTips]);
 
   const pickTips = (topic: string) => {
-    setCurrentTips(getTipsForTopic(topic, isEnglish));
+    const t = getTipsForTopic(topic, isEnglish);
+    setCurrentTips(t);
   };
 
   const generate = () => {
@@ -192,11 +206,9 @@ export default function Home() {
         grad.addColorStop(1, "rgba(0,0,0,0.92)");
         ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
 
-        // العنوان - ثابت وواضح
-        const pulse = 1 + Math.sin(time / 180) * 0.02;
         ctx.save();
         ctx.translate(540, 340);
-        ctx.scale(pulse, pulse);
+        ctx.scale(1 + Math.sin(time / 180) * 0.02, 1 + Math.sin(time / 180) * 0.02);
         ctx.translate(-540, -340);
         ctx.fillStyle = "#FFFFFF";
         ctx.textAlign = "center";
@@ -217,27 +229,25 @@ export default function Home() {
         ctx.restore();
         ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
-        // ===== الكتابة حرف حرف - آلة كاتبة حقيقية =====
-        // كل نقطة بتاخد 1.6 ثانية كتابة: 0-1.6 ث = 01 بتنكتب، 1.6-3.2 ث = 02 بتنكتب، وهيك
-        const TIME_PER_TIP = 1600;
+        // ===== كتابة بطيئة وواضحة بالفيديو =====
+        // كل نقطة بتاخد 2 ثانية: 0-2 ث = 01 بتنكتب حرف حرف، 2-4 ث = 02، وهيك
+        // كل حرف 120ms - بتشوفو عم ينكتب قدامك
+        const TIME_PER_TIP = 2000;
+        const MS_PER_CHAR = 120;
         tips.forEach((tip, i) => {
           const startTime = i * TIME_PER_TIP;
-          if (time < startTime) return; // لسا ما اجا دورها
+          if (time < startTime) return;
           const timeInTip = time - startTime;
-          // كل حرف بياخد 70 ملي ثانية - كتابة واضحة مش سريعة
-          const charsToShow = Math.min(tip.length, Math.floor(timeInTip / 70));
+          const charsToShow = Math.min(tip.length, Math.floor(timeInTip / MS_PER_CHAR));
           let display = tip.slice(0, charsToShow);
           const isTyping = charsToShow < tip.length;
-          // مؤشر الكتابة | بيرمش - بيبين انو عم يكتب هلأ
-          const blink = Math.floor(time / 250) % 2 === 0;
+          const blink = Math.floor(time / 300) % 2 === 0;
           if (isTyping && blink) display += "|";
-          else if (isTyping) display += " ";
           const y = 920 + i * 165;
-          // صندوق أسود غامق
           ctx.fillStyle = "rgba(0,0,0,0.78)";
           ctx.beginPath(); ctx.roundRect(60, y, 960, 125, 28); ctx.fill();
           ctx.strokeStyle = isTyping ? "#FACC15" : "rgba(255,255,255,0.85)";
-          ctx.lineWidth = isTyping ? 3.5 : 2.5;
+          ctx.lineWidth = isTyping ? 4 : 2.5;
           ctx.stroke();
           ctx.fillStyle = "#FACC15"; ctx.textAlign = "left"; ctx.font = "900 46px Arial";
           ctx.fillText(`0${i + 1}`, 110, y + 78);
@@ -360,16 +370,17 @@ export default function Home() {
               </div>
             </div>
             <div className="mb-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-              <h3 className="font-bold text-[15px] mb-3">✍️ النقاط - بتنكتب حرف حرف:</h3>
-              <div className="space-y-2 min-h-[120px]">
+              <h3 className="font-bold text-[15px] mb-3">✍️ المعاينة - شوف كيف بتنكتب:</h3>
+              <div className="space-y-2 min-h-[140px]">
                 {displayTips.map((t,i) => (
-                  <div key={i} className="flex gap-2 items-center text-[13px]">
+                  <div key={i} className={`flex gap-2 items-center text-[13px] p-2 rounded-xl ${typingIndex === i ? "bg-yellow-400/10 border border-yellow-400/40" : ""}`}>
                     <span className="bg-yellow-400 text-black font-black w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0">{i+1}</span>
-                    <span className="text-white font-bold">{t}<span className="text-yellow-400 animate-pulse">|</span></span>
+                    <span className="text-white font-bold">{t}{typingIndex === i && <span className="text-yellow-400 animate-pulse text-[16px]">|</span>}</span>
                   </div>
                 ))}
+                {displayTips.length === 0 && <p className="text-zinc-500 text-[12px]">جاري الكتابة... ⌨️</p>}
               </div>
-              <p className="text-[11px] text-zinc-500 mt-3">شايف؟ بتنكتب حرف حرف زي الآلة الكاتبة ⌨️</p>
+              <button onClick={() => startTypingPreview(currentTips)} className="w-full bg-zinc-800 py-2.5 rounded-xl text-[12px] font-bold mt-3">↻ إعادة الكتابة من الأول - شوفها بتنكتب</button>
             </div>
             <div className="flex justify-center mb-5">
               <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-zinc-900">
@@ -379,10 +390,10 @@ export default function Home() {
                   <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center mt-7 drop-shadow-lg animate-pulse">{selectedTopic}</p>
                   <div className="space-y-2.5">
                     {displayTips.map((t, i) => (
-                      <div key={i} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-black/80 backdrop-blur-md border border-white/40 rounded-2xl px-4 py-3 shadow-lg">
+                      <div key={i} dir={isEnglish ? "ltr" : "rtl"} className={`flex items-center gap-3 bg-black/80 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg ${typingIndex === i ? "border-2 border-yellow-400" : "border border-white/40"}`}>
                         <span className="text-yellow-400 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
                         <span className="w-px h-6 bg-white/40 shrink-0"></span>
-                        <span className="text-white text-[13px] font-bold leading-snug text-left drop-shadow-md">{t}<span className="text-yellow-400 animate-pulse">|</span></span>
+                        <span className="text-white text-[13px] font-bold leading-snug text-left drop-shadow-md">{t}{typingIndex === i && <span className="text-yellow-400 animate-pulse">|</span>}</span>
                       </div>
                     ))}
                   </div>
