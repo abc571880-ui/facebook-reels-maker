@@ -15,7 +15,6 @@ const NICHES = [
   { id: "cooking", name: "الطبخ 🍳" },
 ];
 
-// النقاط هلأ مرتبطة بالموضوع - كل موضوع إلو نقاطو الخاصة
 const TIPS_BY_TOPIC_EN: Record<string,string[]> = {
   savings: ["Save 20% first","Automate savings","Cut 3 subscriptions","No impulse buys","Emergency fund first","Track every dollar"],
   money: ["Start with $100","One side income","Learn then earn","Avoid bad debt","Invest monthly","Skills then stocks"],
@@ -79,7 +78,6 @@ function makeUniqueTopics(isEnglish: boolean, count: number, used: string[]) {
   return out;
 }
 
-// بيطلع النقاط حسب الكلمة اللي بالعنوان
 function getTipsForTopic(topic: string, isEnglish: boolean) {
   const map = isEnglish ? TIPS_BY_TOPIC_EN : TIPS_BY_TOPIC_AR;
   const lower = topic.toLowerCase();
@@ -107,39 +105,37 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const [previewCount, setPreviewCount] = useState(1);
   const [currentTips, setCurrentTips] = useState<string[]>(TIPS_BY_TOPIC_EN.default.slice(0,5));
-  const [typedText, setTypedText] = useState("");
+  const [displayTips, setDisplayTips] = useState<string[]>([]);
 
   const isEnglish = country === "USA" || country === "UK";
   const currentCountry = COUNTRIES.find(c => c.id === country)!;
 
-  useEffect(() => {
-    if (!selectedTopic) return;
-    setPreviewCount(1);
-    const interval = setInterval(() => {
-      setPreviewCount(prev => {
-        if (prev >= 5) { clearInterval(interval); return prev; }
-        return prev + 1;
-      });
-    }, 1200);
-    return () => clearInterval(interval);
-  }, [selectedTopic]);
-
-  // تأثير الكتابة حرف حرف للمعاينة
+  // تأثير الكتابة للمعاينة - حرف حرف، نقطة ورا نقطة
   useEffect(() => {
     if (!selectedTopic || currentTips.length === 0) return;
-    const currentTip = currentTips[Math.min(previewCount - 1, 4)];
-    if (!currentTip) return;
-    setTypedText("");
-    let i = 0;
-    const typing = setInterval(() => {
-      i++;
-      setTypedText(currentTip.slice(0, i));
-      if (i >= currentTip.length) clearInterval(typing);
-    }, 35);
-    return () => clearInterval(typing);
-  }, [previewCount, selectedTopic, currentTips]);
+    setDisplayTips([]);
+    let tipIndex = 0;
+    let charIndex = 0;
+    let current: string[] = [];
+    const interval = setInterval(() => {
+      if (tipIndex >= currentTips.length) { clearInterval(interval); return; }
+      const fullTip = currentTips[tipIndex];
+      charIndex++;
+      const partial = fullTip.slice(0, charIndex);
+      const next = [...current];
+      next[tipIndex] = partial;
+      current = next;
+      setDisplayTips([...next]);
+      if (charIndex >= fullTip.length) {
+        // خلصت النقطة - استنى شوي وابدأ اللي بعدها
+        setTimeout(() => {}, 300);
+        tipIndex++;
+        charIndex = 0;
+      }
+    }, 60);
+    return () => clearInterval(interval);
+  }, [selectedTopic, currentTips]);
 
   const pickTips = (topic: string) => {
     setCurrentTips(getTipsForTopic(topic, isEnglish));
@@ -191,50 +187,79 @@ export default function Home() {
       const drawFrame = (time: number) => {
         ctx.drawImage(img, 0, 0, 1080, 1920);
         const grad = ctx.createLinearGradient(0, 0, 0, 1920);
-        grad.addColorStop(0, "rgba(0,0,0,0.75)"); grad.addColorStop(0.5, "rgba(0,0,0,0.4)"); grad.addColorStop(1, "rgba(0,0,0,0.85)");
+        grad.addColorStop(0, "rgba(0,0,0,0.82)");
+        grad.addColorStop(0.5, "rgba(0,0,0,0.68)");
+        grad.addColorStop(1, "rgba(0,0,0,0.92)");
         ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
-        const pulse = 1 + Math.sin(time / 180) * 0.03;
+
+        // العنوان - ثابت وواضح
+        const pulse = 1 + Math.sin(time / 180) * 0.02;
         ctx.save();
-        ctx.translate(540, 360);
+        ctx.translate(540, 340);
         ctx.scale(pulse, pulse);
-        ctx.translate(-540, -360);
-        ctx.fillStyle = "white"; ctx.textAlign = "center";
-        ctx.font = "900 72px Arial";
+        ctx.translate(-540, -340);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.textAlign = "center";
+        ctx.font = "900 58px Arial";
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 4;
         const words = selectedTopic.split(" ");
         let lines: string[] = []; let cur = "";
-        words.forEach(w => { if ((cur + " " + w).trim().length > 28) { lines.push(cur.trim()); cur = w; } else cur += " " + w; });
-        if (cur.trim()) lines.push(cur.trim());
-        lines.forEach((line, i) => ctx.fillText(line, 540, 320 + i * 90));
-        ctx.restore();
-        const visibleCount = Math.min(tips.length, Math.floor(time / 1200) + 1);
-        const visibleTips = tips.slice(0, visibleCount);
-        visibleTips.forEach((tip, i) => {
-          const y = 950 + i * 160;
-          ctx.fillStyle = "rgba(255,255,255,0.14)";
-          ctx.beginPath(); ctx.roundRect(80, y, 920, 120, 32); ctx.fill();
-          ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.lineWidth = 2; ctx.stroke();
-          ctx.fillStyle = "white"; ctx.textAlign = "left"; ctx.font = "900 44px Arial";
-          ctx.fillText(`0${i + 1}`, 130, y + 75);
-          ctx.fillStyle = "rgba(255,255,255,0.25)"; ctx.fillRect(230, y + 25, 2, 70);
-          ctx.font = "600 38px Arial";
-          // تأثير الكتابة: آخر نقطة بتنكتب حرف حرف، القديمة كاملة
-          let display = tip;
-          if (i === visibleCount - 1) {
-            const timeInThisPoint = time - i * 1200;
-            const charsToShow = Math.floor(timeInThisPoint / 35);
-            display = tip.slice(0, Math.max(1, charsToShow));
-            // مؤشر الكتابة |
-            if (charsToShow < tip.length) display += "|";
-          }
-          ctx.fillText(display, 260, y + 75);
+        words.forEach(w => {
+          const test = (cur + " " + w).trim();
+          if (test.length > 22) { if (cur.trim()) lines.push(cur.trim()); cur = w; }
+          else cur = test;
         });
-        if (visibleCount < 5) {
-          ctx.fillStyle = "rgba(250,204,21,0.95)"; ctx.textAlign = "center"; ctx.font = "900 36px Arial";
+        if (cur.trim()) lines.push(cur.trim());
+        if (lines.length > 3) ctx.font = "900 48px Arial";
+        lines.forEach((line, i) => ctx.fillText(line, 540, 260 + i * 78));
+        ctx.restore();
+        ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+        // ===== الكتابة حرف حرف - آلة كاتبة حقيقية =====
+        // كل نقطة بتاخد 1.6 ثانية كتابة: 0-1.6 ث = 01 بتنكتب، 1.6-3.2 ث = 02 بتنكتب، وهيك
+        const TIME_PER_TIP = 1600;
+        tips.forEach((tip, i) => {
+          const startTime = i * TIME_PER_TIP;
+          if (time < startTime) return; // لسا ما اجا دورها
+          const timeInTip = time - startTime;
+          // كل حرف بياخد 70 ملي ثانية - كتابة واضحة مش سريعة
+          const charsToShow = Math.min(tip.length, Math.floor(timeInTip / 70));
+          let display = tip.slice(0, charsToShow);
+          const isTyping = charsToShow < tip.length;
+          // مؤشر الكتابة | بيرمش - بيبين انو عم يكتب هلأ
+          const blink = Math.floor(time / 250) % 2 === 0;
+          if (isTyping && blink) display += "|";
+          else if (isTyping) display += " ";
+          const y = 920 + i * 165;
+          // صندوق أسود غامق
+          ctx.fillStyle = "rgba(0,0,0,0.78)";
+          ctx.beginPath(); ctx.roundRect(60, y, 960, 125, 28); ctx.fill();
+          ctx.strokeStyle = isTyping ? "#FACC15" : "rgba(255,255,255,0.85)";
+          ctx.lineWidth = isTyping ? 3.5 : 2.5;
+          ctx.stroke();
+          ctx.fillStyle = "#FACC15"; ctx.textAlign = "left"; ctx.font = "900 46px Arial";
+          ctx.fillText(`0${i + 1}`, 110, y + 78);
+          ctx.fillStyle = "rgba(255,255,255,0.6)"; ctx.fillRect(215, y + 28, 3, 70);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.shadowColor = "rgba(0,0,0,1)";
+          ctx.shadowBlur = 10;
+          ctx.font = "700 40px Arial";
+          ctx.fillText(display, 245, y + 78);
+          ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+        });
+
+        const finishedCount = Math.min(5, Math.floor(time / TIME_PER_TIP) + 1);
+        if (finishedCount < 5) {
+          ctx.fillStyle = "#FACC15"; ctx.textAlign = "center"; ctx.font = "900 38px Arial";
+          ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 10;
           const hookText = isEnglish ? "WAIT FOR #5 🔥 IT'S THE BEST" : "استنى النقطة 5 🔥 هي الأقوى";
-          ctx.fillText(hookText, 540, 1780);
+          ctx.fillText(hookText, 540, 1790);
+          ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
         }
-        ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.textAlign = "center"; ctx.font = "400 28px Arial";
-        ctx.fillText("@ yourpage  •  Follow for more", 540, 1840);
+        ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "center"; ctx.font = "600 28px Arial";
+        ctx.fillText("@ yourpage  •  Follow for more", 540, 1855);
         ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.fillRect(0, 1910, 1080, 10);
         ctx.fillStyle = "#22c55e"; ctx.fillRect(0, 1910, 1080 * (time / 10000), 10);
       };
@@ -335,29 +360,29 @@ export default function Home() {
               </div>
             </div>
             <div className="mb-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-              <h3 className="font-bold text-[15px] mb-3">✍️ النقاط اللي راح تنكتب بالفيديو:</h3>
-              <div className="space-y-2">
-                {tips.map((t,i) => (
+              <h3 className="font-bold text-[15px] mb-3">✍️ النقاط - بتنكتب حرف حرف:</h3>
+              <div className="space-y-2 min-h-[120px]">
+                {displayTips.map((t,i) => (
                   <div key={i} className="flex gap-2 items-center text-[13px]">
                     <span className="bg-yellow-400 text-black font-black w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0">{i+1}</span>
-                    <span className="text-zinc-200">{i === previewCount-1 && previewCount <=5 ? typedText + "|" : t}</span>
+                    <span className="text-white font-bold">{t}<span className="text-yellow-400 animate-pulse">|</span></span>
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-zinc-500 mt-3">النقاط بتتغير حسب الموضوع اللي اخترتو 👆</p>
+              <p className="text-[11px] text-zinc-500 mt-3">شايف؟ بتنكتب حرف حرف زي الآلة الكاتبة ⌨️</p>
             </div>
             <div className="flex justify-center mb-5">
               <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-zinc-900">
                 <img src={selectedBg.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
                   <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center mt-7 drop-shadow-lg animate-pulse">{selectedTopic}</p>
                   <div className="space-y-2.5">
-                    {tips.slice(0, previewCount).map((t, i) => (
-                      <div key={t} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 shadow-lg">
-                        <span className="text-white/90 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
-                        <span className="w-px h-6 bg-white/20 shrink-0"></span>
-                        <span className="text-white text-[13px] font-semibold leading-snug text-left">{i === previewCount-1 ? typedText + "|" : t}</span>
+                    {displayTips.map((t, i) => (
+                      <div key={i} dir={isEnglish ? "ltr" : "rtl"} className="flex items-center gap-3 bg-black/80 backdrop-blur-md border border-white/40 rounded-2xl px-4 py-3 shadow-lg">
+                        <span className="text-yellow-400 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
+                        <span className="w-px h-6 bg-white/40 shrink-0"></span>
+                        <span className="text-white text-[13px] font-bold leading-snug text-left drop-shadow-md">{t}<span className="text-yellow-400 animate-pulse">|</span></span>
                       </div>
                     ))}
                   </div>
