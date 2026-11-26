@@ -113,7 +113,6 @@ export default function Home() {
   const isEnglish = country === "USA" || country === "UK";
   const currentCountry = COUNTRIES.find(c => c.id === country)!;
 
-  // ===== كتابة حقيقية للمعاينة - بطيئة وواضحة =====
   const startTypingPreview = (tipsToType: string[]) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDisplayTips([]);
@@ -124,7 +123,6 @@ export default function Home() {
     const typeNext = () => {
       if (tipIdx >= tipsToType.length) { setTypingIndex(-1); return; }
       const full = tipsToType[tipIdx];
-      // أول مرة - افتح صندوق فاضي
       if (charIdx === 0) {
         setTypingIndex(tipIdx);
         current = [...current, ""];
@@ -134,9 +132,8 @@ export default function Home() {
       current[tipIdx] = full.slice(0, charIdx);
       setDisplayTips([...current]);
       if (charIdx < full.length) {
-        timeoutRef.current = setTimeout(typeNext, 120); // كل حرف 120ms - بطيء وواضح
+        timeoutRef.current = setTimeout(typeNext, 110);
       } else {
-        // خلصت النقطة - وقفة 400ms وبعدين اللي بعدها
         tipIdx++;
         charIdx = 0;
         timeoutRef.current = setTimeout(typeNext, 400);
@@ -198,42 +195,54 @@ export default function Home() {
       img.crossOrigin = "anonymous";
       img.src = selectedBg.img;
       await new Promise<void>((res) => { img.onload = () => res(); img.onerror = () => res(); });
-      const drawFrame = (time: number) => {
-        ctx.drawImage(img, 0, 0, 1080, 1920);
-        const grad = ctx.createLinearGradient(0, 0, 0, 1920);
-        grad.addColorStop(0, "rgba(0,0,0,0.82)");
-        grad.addColorStop(0.5, "rgba(0,0,0,0.68)");
-        grad.addColorStop(1, "rgba(0,0,0,0.92)");
-        ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
 
-        ctx.save();
-        ctx.translate(540, 340);
-        ctx.scale(1 + Math.sin(time / 180) * 0.02, 1 + Math.sin(time / 180) * 0.02);
-        ctx.translate(-540, -340);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.textAlign = "center";
-        ctx.font = "900 58px Arial";
-        ctx.shadowColor = "rgba(0,0,0,0.9)";
-        ctx.shadowBlur = 18;
-        ctx.shadowOffsetY = 4;
+      // ===== الرسم - نسخة مصلحة: كتابة بيضاء صلبة + صندوق أسود صلب =====
+      const drawFrame = (time: number) => {
+        // 1. الصورة
+        ctx.drawImage(img, 0, 0, 1080, 1920);
+
+        // 2. تظليل خفيف فقط
+        const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+        grad.addColorStop(0, "rgba(0,0,0,0.45)");
+        grad.addColorStop(0.5, "rgba(0,0,0,0.35)");
+        grad.addColorStop(1, "rgba(0,0,0,0.55)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 1080, 1920);
+
+        // 3. العنوان - أبيض صلب + صندوق أسود صلب
         const words = selectedTopic.split(" ");
-        let lines: string[] = []; let cur = "";
+        let lines: string[] = [];
+        let cur = "";
         words.forEach(w => {
           const test = (cur + " " + w).trim();
-          if (test.length > 22) { if (cur.trim()) lines.push(cur.trim()); cur = w; }
+          if (test.length > 20) { if (cur.trim()) lines.push(cur.trim()); cur = w; }
           else cur = test;
         });
         if (cur.trim()) lines.push(cur.trim());
-        if (lines.length > 3) ctx.font = "900 48px Arial";
-        lines.forEach((line, i) => ctx.fillText(line, 540, 260 + i * 78));
-        ctx.restore();
-        ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        if (lines.length > 3) lines = lines.slice(0, 3);
+        const titleHeight = lines.length * 84 + 56;
+        // صندوق أسود صلب - fillRect مش roundRect
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(40, 170, 1000, titleHeight);
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(40, 170, 1000, titleHeight);
+        ctx.textAlign = "center";
+        ctx.font = "900 58px Arial, sans-serif";
+        lines.forEach((line, i) => {
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 10;
+          ctx.lineJoin = "round";
+          ctx.strokeText(line, 540, 260 + i * 84);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillText(line, 540, 260 + i * 84);
+          // طبقة تانية بيضاء عشان تكون أوضح
+          ctx.fillText(line, 540, 260 + i * 84);
+        });
 
-        // ===== كتابة بطيئة وواضحة بالفيديو =====
-        // كل نقطة بتاخد 2 ثانية: 0-2 ث = 01 بتنكتب حرف حرف، 2-4 ث = 02، وهيك
-        // كل حرف 120ms - بتشوفو عم ينكتب قدامك
+        // 4. النقاط - كلها بيضاء صلبة
         const TIME_PER_TIP = 2000;
-        const MS_PER_CHAR = 120;
+        const MS_PER_CHAR = 90;
         tips.forEach((tip, i) => {
           const startTime = i * TIME_PER_TIP;
           if (time < startTime) return;
@@ -244,35 +253,66 @@ export default function Home() {
           const blink = Math.floor(time / 300) % 2 === 0;
           if (isTyping && blink) display += "|";
           const y = 920 + i * 165;
-          ctx.fillStyle = "rgba(0,0,0,0.78)";
-          ctx.beginPath(); ctx.roundRect(60, y, 960, 125, 28); ctx.fill();
-          ctx.strokeStyle = isTyping ? "#FACC15" : "rgba(255,255,255,0.85)";
-          ctx.lineWidth = isTyping ? 4 : 2.5;
-          ctx.stroke();
-          ctx.fillStyle = "#FACC15"; ctx.textAlign = "left"; ctx.font = "900 46px Arial";
-          ctx.fillText(`0${i + 1}`, 110, y + 78);
-          ctx.fillStyle = "rgba(255,255,255,0.6)"; ctx.fillRect(215, y + 28, 3, 70);
+
+          // صندوق أسود صلب 100% - #000000
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(40, y, 1000, 132);
+          // حد أبيض
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(40, y, 1000, 132);
+
+          // الرقم 01 - أبيض
           ctx.fillStyle = "#FFFFFF";
-          ctx.shadowColor = "rgba(0,0,0,1)";
-          ctx.shadowBlur = 10;
-          ctx.font = "700 40px Arial";
-          ctx.fillText(display, 245, y + 78);
-          ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+          ctx.textAlign = "left";
+          ctx.font = "900 54px Arial, sans-serif";
+          ctx.fillText(`0${i + 1}`, 85, y + 84);
+          ctx.fillText(`0${i + 1}`, 85, y + 84);
+
+          // خط فاصل أبيض
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(195, y + 28, 4, 76);
+
+          // نص النقطة - أبيض نقي
+          ctx.font = "900 42px Arial, sans-serif";
+          ctx.textAlign = "left";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 8;
+          ctx.lineJoin = "round";
+          ctx.strokeText(display, 225, y + 84);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillText(display, 225, y + 84);
+          // طبقة تانية بيضاء - هاد اللي بخليها صلبة مش شفافة
+          ctx.fillText(display, 225, y + 84);
         });
 
+        // 5. نص التحفيز - أبيض
         const finishedCount = Math.min(5, Math.floor(time / TIME_PER_TIP) + 1);
         if (finishedCount < 5) {
-          ctx.fillStyle = "#FACC15"; ctx.textAlign = "center"; ctx.font = "900 38px Arial";
-          ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 10;
-          const hookText = isEnglish ? "WAIT FOR #5 🔥 IT'S THE BEST" : "استنى النقطة 5 🔥 هي الأقوى";
-          ctx.fillText(hookText, 540, 1790);
-          ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+          const hookText = isEnglish ? "WAIT FOR #5 - IT'S THE BEST" : "استنى النقطة 5 - هي الأقوى";
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(120, 1740, 840, 72);
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(120, 1740, 840, 72);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.textAlign = "center";
+          ctx.font = "900 36px Arial, sans-serif";
+          ctx.fillText(hookText, 540, 1786);
+          ctx.fillText(hookText, 540, 1786);
         }
-        ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "center"; ctx.font = "600 28px Arial";
-        ctx.fillText("@ yourpage  •  Follow for more", 540, 1855);
-        ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.fillRect(0, 1910, 1080, 10);
-        ctx.fillStyle = "#22c55e"; ctx.fillRect(0, 1910, 1080 * (time / 10000), 10);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.textAlign = "center";
+        ctx.font = "700 28px Arial, sans-serif";
+        ctx.fillText("@ yourpage  •  Follow for more", 540, 1862);
+
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.fillRect(0, 1910, 1080, 10);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 1910, 1080 * (time / 10000), 10);
       };
+
       const stream = (canvas as any).captureStream(30);
       const recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
       const chunks: Blob[] = [];
@@ -364,7 +404,7 @@ export default function Home() {
                   <button key={b.id} onClick={() => setSelectedBg(b)} className="relative rounded-2xl overflow-hidden aspect-square border border-zinc-800">
                     <img src={b.img} className="w-full h-full object-cover" alt={b.name} />
                     {selectedBg.id === b.id && <div className="absolute inset-0 border-[3px] border-yellow-400 rounded-2xl" />}
-                    <span className="absolute bottom-1.5 right-1.5 left-1.5 bg-black/75 text-[10px] py-1 rounded-lg">{b.name}</span>
+                    <span className="absolute bottom-1.5 right-1.5 left-1.5 bg-black text-[10px] py-1 rounded-lg font-bold">{b.name}</span>
                   </button>
                 ))}
               </div>
@@ -373,35 +413,40 @@ export default function Home() {
               <h3 className="font-bold text-[15px] mb-3">✍️ المعاينة - شوف كيف بتنكتب:</h3>
               <div className="space-y-2 min-h-[140px]">
                 {displayTips.map((t,i) => (
-                  <div key={i} className={`flex gap-2 items-center text-[13px] p-2 rounded-xl ${typingIndex === i ? "bg-yellow-400/10 border border-yellow-400/40" : ""}`}>
-                    <span className="bg-yellow-400 text-black font-black w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0">{i+1}</span>
-                    <span className="text-white font-bold">{t}{typingIndex === i && <span className="text-yellow-400 animate-pulse text-[16px]">|</span>}</span>
+                  <div key={i} className={`flex gap-2 items-center text-[13px] p-2 rounded-xl ${typingIndex === i ? "bg-white/10 border border-white/40" : ""}`}>
+                    <span className="bg-white text-black font-black w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0">{i+1}</span>
+                    <span className="text-white font-bold">{t}{typingIndex === i && <span className="text-white animate-pulse text-[16px]">|</span>}</span>
                   </div>
                 ))}
                 {displayTips.length === 0 && <p className="text-zinc-500 text-[12px]">جاري الكتابة... ⌨️</p>}
               </div>
               <button onClick={() => startTypingPreview(currentTips)} className="w-full bg-zinc-800 py-2.5 rounded-xl text-[12px] font-bold mt-3">↻ إعادة الكتابة من الأول - شوفها بتنكتب</button>
             </div>
+
+            {/* المعاينة - صندوق أسود صلب + كتابة بيضاء */}
             <div className="flex justify-center mb-5">
-              <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-zinc-900">
+              <div className="w-[280px] aspect-[9/16] rounded-[28px] overflow-hidden relative shadow-2xl border border-zinc-700 bg-black">
                 <img src={selectedBg.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+                <div className="absolute inset-0 bg-black/40" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
-                  <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center mt-7 drop-shadow-lg animate-pulse">{selectedTopic}</p>
+                  <div className="bg-black border border-white rounded-2xl p-3 mt-6 shadow-xl">
+                    <p dir={isEnglish ? "ltr" : "rtl"} className="text-white font-black text-[19px] leading-tight text-center [text-shadow:0_2px_6px_rgba(0,0,0,1)]">{selectedTopic}</p>
+                  </div>
                   <div className="space-y-2.5">
                     {displayTips.map((t, i) => (
-                      <div key={i} dir={isEnglish ? "ltr" : "rtl"} className={`flex items-center gap-3 bg-black/80 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg ${typingIndex === i ? "border-2 border-yellow-400" : "border border-white/40"}`}>
-                        <span className="text-yellow-400 text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
-                        <span className="w-px h-6 bg-white/40 shrink-0"></span>
-                        <span className="text-white text-[13px] font-bold leading-snug text-left drop-shadow-md">{t}{typingIndex === i && <span className="text-yellow-400 animate-pulse">|</span>}</span>
+                      <div key={i} dir={isEnglish ? "ltr" : "rtl"} className={`flex items-center gap-3 bg-black rounded-2xl px-4 py-3 shadow-xl ${typingIndex === i ? "border-2 border-white" : "border border-white/80"}`}>
+                        <span className="text-white text-[13px] font-black tracking-wider shrink-0 w-7 text-center">0{i + 1}</span>
+                        <span className="w-px h-6 bg-white shrink-0"></span>
+                        <span className="text-white text-[13px] font-bold leading-snug text-left [text-shadow:0_2px_4px_rgba(0,0,0,1)]">{t}{typingIndex === i && <span className="text-white animate-pulse">|</span>}</span>
                       </div>
                     ))}
                   </div>
-                  <p className="text-center text-[10px] text-zinc-300">@ yourpage • Follow for more</p>
+                  <p className="text-center text-[10px] text-white font-bold [text-shadow:0_1px_3px_rgba(0,0,0,1)]">@ yourpage • Follow for more</p>
                 </div>
-                <span className="absolute top-3 left-3 bg-black/70 backdrop-blur text-[10px] px-2.5 py-1 rounded-full">10 ثواني</span>
+                <span className="absolute top-3 left-3 bg-black text-[10px] font-bold px-2.5 py-1 rounded-full">10 ثواني</span>
               </div>
             </div>
+
             <button onClick={downloadVideo} disabled={downloading} className="w-full bg-green-500 font-black py-4 rounded-2xl mb-2 shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all disabled:opacity-70">
               {downloading ? `⏳ جاري توليد الفيديو... ${downloadProgress}%` : "⬇️ تحميل فيديو - 10 ثواني"}
             </button>
